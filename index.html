@@ -129,57 +129,116 @@
             opacity: 1;
         }
 
-        /* ── MOVING WATERMARK RAPAT (ANTI FOTO & SCREENSHOT) ── */
-        .watermark-layer {
+        /* ── SECURITY TIMER (WIDGET STOPWATCH POPUP) ── */
+        .timer-widget {
             position: fixed;
-            top: -100%; left: -100%; width: 300%; height: 300%;
-            pointer-events: none;
-            z-index: 9997; 
-            /* Menggunakan pola teks berulang yang lebih rapat */
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='200'><text x='50%' y='50%' transform='rotate(-35 125 100)' fill='rgba(0,0,0,0.05)' font-size='18' font-family='sans-serif' font-weight='bold' text-anchor='middle'>DOKUMEN RAHASIA</text><text x='50%' y='70%' transform='rotate(-35 125 100)' fill='rgba(0,0,0,0.03)' font-size='14' font-family='sans-serif' font-weight='600' text-anchor='middle'>drg. Fakhrurrazi</text></svg>");
-            animation: watermarkMove 30s linear infinite;
+            bottom: 24px;
+            right: 24px; /* Dipindahkan ke sudut kanan bawah */
+            z-index: 9999;
+            display: none; /* Dimunculkan via JS */
+            flex-direction: row-reverse; /* Popup muncul di sebelah kiri tombol */
+            align-items: center; /* Rata tengah secara vertikal */
+            gap: 12px;
+        }
+
+        .stopwatch-btn {
+            width: 48px; /* Dibuat sedikit lebih kecil agar proporsional */
+            height: 48px;
+            border-radius: 50%;
+            background: var(--surface-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+        }
+
+        .stopwatch-btn:hover, .stopwatch-btn:active {
+            transform: scale(1.05);
+            background: #FFFFFF;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.15);
+            color: var(--primary);
+        }
+
+        .stopwatch-btn.warning {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border-color: rgba(239, 68, 68, 0.3);
+            animation: pulseWarning 1.5s infinite;
+        }
+
+        .timer-hand {
+            transform-origin: 12px 13px;
+            animation: spinHand 60s linear infinite; /* Putaran presisi setiap 60 detik */
+        }
+
+        @keyframes spinHand {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .timer-popup {
+            background: rgba(15, 23, 42, 0.90);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 8px 14px; /* Dibuat lebih kecil */
+            color: white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
             opacity: 0;
-            transition: opacity 0.5s;
+            transform: translateX(15px) scale(0.95); /* Animasi meluncur dari kanan ke kiri */
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: right center; /* Titik animasi dari kanan */
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: flex-end; /* Rata kanan */
+        }
+
+        .timer-popup.show {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .timer-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .timer-value {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
+            transition: color 0.3s;
+        }
+
+        .timer-value.warning {
+            color: var(--error);
         }
         
-        body.unlocked-mode .watermark-layer {
-            opacity: 1;
+        .timer-info {
+            font-size: 8px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 2px;
+            letter-spacing: 0.05em;
         }
 
-        @keyframes watermarkMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(250px, 200px); }
-        }
-
-        /* ── SECURITY TIMER (10 MENIT) ── */
-        .security-timer {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(239, 68, 68, 0.95);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 8px 16px;
-            border-radius: var(--radius-pill);
-            font-weight: 800;
-            font-size: 16px;
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
-            letter-spacing: 2px;
-            border: 1px solid rgba(255,255,255,0.4);
-        }
-
-        .timer-icon {
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
+        @keyframes pulseWarning {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
         }
 
         /* ── EXPIRED SCREEN (SCAN ULANG) ── */
@@ -661,10 +720,14 @@
             .item-text { width: 100%; }
             .item-price { align-self: flex-start; width: 100%; text-align: left; background: rgba(124, 58, 237, 0.05); }
             .section-header { padding: 16px 20px; }
+            .app-bar { justify-content: center; padding: 0; }
             .app-bar-title { font-size: 14px; }
             .swipe-container { bottom: 6vh; height: 62px; }
             .swipe-thumb { width: 52px; height: 52px; }
-            .security-timer { font-size: 14px; padding: 6px 12px; top: 16px; right: 16px; }
+            .timer-widget { bottom: 20px; right: 20px; } 
+            .stopwatch-btn { width: 44px; height: 44px; }
+            .timer-popup { padding: 6px 12px; }
+            .timer-value { font-size: 15px; }
         }
     </style>
 </head>
@@ -672,15 +735,6 @@
 
     <!-- LAYER ANTI-FOTO KAMERA LAIN (MOIRE SCANLINES) -->
     <div class="scanlines"></div>
-
-    <!-- LAYER WATERMARK RAPAT -->
-    <div class="watermark-layer"></div>
-
-    <!-- SECURITY TIMER -->
-    <div class="security-timer" id="securityTimer">
-        <svg class="timer-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        <span id="timerText">10:00</span>
-    </div>
 
     <!-- EXPIRED SCREEN (WAJIB SCAN ULANG) -->
     <div class="expired-screen" id="expiredScreen">
@@ -709,6 +763,23 @@
     <header class="app-bar" id="main-nav">
         <div class="app-bar-title">Praktek drg. Fakhrurrazi</div>
     </header>
+
+    <!-- SECURITY TIMER WIDGET (SUDUT KANAN BAWAH) -->
+    <div class="timer-widget" id="timerWidget">
+        <button class="stopwatch-btn" id="stopwatchBtn" title="Lihat Sisa Waktu">
+            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="13" r="9"></circle>
+                <path d="M12 4v-1"></path>
+                <path d="M10 3h4"></path>
+                <path d="M12 13l2.5-2.5" class="timer-hand"></path>
+            </svg>
+        </button>
+        <div class="timer-popup" id="timerPopup">
+            <span class="timer-label">Sisa Waktu Akses</span>
+            <span class="timer-value" id="timerText">10:00</span>
+            <span class="timer-info">Maksimal 10 Menit</span>
+        </div>
+    </div>
 
     <!-- HERO / WELCOME SCREEN -->
     <div class="hero" id="hero-section">
@@ -1033,7 +1104,9 @@
         const mainNav = document.getElementById('main-nav');
         
         // Timer Variables
-        const timerElement = document.getElementById('securityTimer');
+        const timerWidget = document.getElementById('timerWidget');
+        const timerPopup = document.getElementById('timerPopup');
+        const stopwatchBtn = document.getElementById('stopwatchBtn');
         const timerText = document.getElementById('timerText');
         const expiredScreen = document.getElementById('expiredScreen');
         let viewTimeLeft = 600; // 10 Menit dalam detik
@@ -1091,9 +1164,14 @@
         window.addEventListener('touchend', handleEnd);
 
         // --- SISTEM SELF-DESTRUCT (10 MENIT = 600 DETIK) ---
+        // Toggle (Tampilkan/Sembunyikan) Popup Timer
+        stopwatchBtn.addEventListener('click', () => {
+            timerPopup.classList.toggle('show');
+        });
+
         function startSecurityTimer() {
-            timerElement.style.display = 'flex';
-            document.body.classList.add('unlocked-mode'); // Munculkan Watermark & Scanline
+            timerWidget.style.display = 'flex';
+            document.body.classList.add('unlocked-mode'); // Munculkan Scanline
             
             expireInterval = setInterval(() => {
                 viewTimeLeft--;
@@ -1107,6 +1185,16 @@
                 const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
                 
                 timerText.textContent = `${formattedMinutes}:${formattedSeconds}`;
+                
+                // Peringatan visual jika waktu tersisa 1 menit
+                if (viewTimeLeft <= 60) {
+                    timerText.classList.add('warning');
+                    stopwatchBtn.classList.add('warning');
+                    // Paksa memunculkan popup saat 1 menit terakhir
+                    if (!timerPopup.classList.contains('show')) {
+                        timerPopup.classList.add('show');
+                    }
+                }
                 
                 if (viewTimeLeft <= 0) {
                     clearInterval(expireInterval);
@@ -1125,7 +1213,7 @@
             mainContent.style.display = 'none';
             heroSection.style.display = 'none';
             mainNav.style.display = 'none';
-            timerElement.style.display = 'none';
+            timerWidget.style.display = 'none';
             
             // Tampilkan Layar Wajib Scan Ulang
             expiredScreen.style.display = 'flex';
@@ -1221,7 +1309,14 @@
 
         // Fungsi Pembersih Clipboard
         const clearClipboard = () => {
-            try { navigator.clipboard.writeText(''); } catch(err) {}
+            try { 
+                if (navigator.clipboard && window.isSecureContext) {
+                    const promise = navigator.clipboard.writeText('');
+                    if (promise !== undefined) {
+                        promise.catch(() => {}); // Tangkap error jika promise ditolak
+                    }
+                }
+            } catch(err) {}
         };
 
         // 1. Mencegah Klik Kanan (Context Menu)
