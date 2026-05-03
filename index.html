@@ -48,19 +48,22 @@
             position: relative;
             overflow: hidden; /* Mengunci halaman di awal agar tidak bisa di-scroll */
             
-            /* --- FITUR KEAMANAN: Mencegah Teks Diblok (Highlight) --- */
+            /* --- FITUR KEAMANAN SMARTPHONE & DESKTOP --- */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            -webkit-touch-callout: none; /* Blokir pop-up Long Press di iOS & Android */
+            -webkit-tap-highlight-color: transparent; /* Hilangkan highlight saat disentuh */
         }
         
-        /* Pengecualian keamanan agar kolom pencarian tetap bisa diketik & diblok */
+        /* Pengecualian keamanan agar kolom pencarian tetap bisa diketik */
         input, textarea {
             -webkit-user-select: auto;
             -moz-user-select: auto;
             -ms-user-select: auto;
             user-select: auto;
+            -webkit-touch-callout: default;
         }
 
         /* ── AESTHETIC AMBIENT BACKGROUND ── */
@@ -531,8 +534,8 @@
 
         body.privacy-mode #main-content,
         body.privacy-mode .app-bar {
-            filter: blur(12px) grayscale(30%);
-            opacity: 0.4;
+            filter: blur(12px) grayscale(40%);
+            opacity: 0.3;
             pointer-events: none;
         }
 
@@ -554,7 +557,7 @@
         }
 
         .privacy-message {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             padding: 16px 24px;
@@ -1089,8 +1092,13 @@
         // --- SISTEM KEAMANAN PRIVASI & COPYRIGHT TINGKAT LANJUT ---
         // =========================================================
 
-        // 1. Mencegah Klik Kanan (Context Menu)
-        document.addEventListener('contextmenu', event => event.preventDefault());
+        // 1. Mencegah Klik Kanan (Context Menu) di semua perangkat
+        document.addEventListener('contextmenu', event => {
+            // Kecuali jika sedang mengisi input pencarian
+            if(event.target.tagName !== 'INPUT') {
+                event.preventDefault();
+            }
+        });
 
         // 2. Mencegah fungsi Copy, Cut, dan Paste secara paksa
         document.addEventListener('copy', event => event.preventDefault());
@@ -1125,13 +1133,18 @@
         });
 
         // =========================================================
-        // --- FITUR PRIVACY BLUR (SENSOR OTOMATIS) ---
+        // --- FITUR PRIVACY BLUR (SENSOR OTOMATIS SMARTPHONE) ---
         // =========================================================
         let privacyTimer;
 
         function enablePrivacyMode() {
             if (unlocked) {
                 document.body.classList.add('privacy-mode');
+                
+                // Menutup otomatis keyboard di HP jika pengguna sedang berada di kolom pencarian
+                if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+                    document.activeElement.blur();
+                }
             }
         }
 
@@ -1145,27 +1158,33 @@
         function resetPrivacyTimer() {
             clearTimeout(privacyTimer);
             if (unlocked) {
-                // Layar akan buram otomatis setelah 8 detik jika tidak ada sentuhan/pergerakan di layar
-                privacyTimer = setTimeout(enablePrivacyMode, 8000); 
+                // Layar akan buram otomatis setelah 15 detik jika tidak ada sentuhan di HP
+                privacyTimer = setTimeout(enablePrivacyMode, 15000); 
             }
         }
 
-        // Deteksi aktivitas sentuhan / gerakan kursor untuk membatalkan blur
+        // Deteksi aktivitas sentuhan / gerakan kursor untuk membatalkan blur dan mereset timer
         window.addEventListener('mousemove', disablePrivacyMode);
         window.addEventListener('touchstart', disablePrivacyMode, {passive: true});
         window.addEventListener('touchmove', disablePrivacyMode, {passive: true});
+        window.addEventListener('touchend', disablePrivacyMode, {passive: true}); // Sensor sentuhan layar di HP
         window.addEventListener('scroll', disablePrivacyMode, {passive: true});
         window.addEventListener('keydown', disablePrivacyMode);
 
-        // Langsung blur seketika saat kursor keluar dari jendela browser (Desktop)
+        // Desktop: Langsung blur seketika saat kursor keluar dari jendela browser
         document.addEventListener('mouseleave', enablePrivacyMode);
 
-        // Langsung blur seketika saat berpindah tab atau keluar aplikasi browser (Mobile & Desktop)
-        window.addEventListener('blur', enablePrivacyMode);
+        // Mobile & Desktop: Deteksi akurat saat pindah aplikasi (Recent Apps) atau mematikan layar
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) enablePrivacyMode();
-            else disablePrivacyMode();
+            if (document.visibilityState === 'hidden' || document.hidden) {
+                enablePrivacyMode();
+            } else {
+                disablePrivacyMode();
+            }
         });
+
+        // Mobile: Proteksi saat pengguna berpindah tab (Safari / Chrome)
+        window.addEventListener('pagehide', enablePrivacyMode);
 
     </script>
 
