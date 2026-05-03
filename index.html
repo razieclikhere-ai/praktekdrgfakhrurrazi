@@ -20,6 +20,7 @@
             --secondary: #EC4899; /* Vibrant Pink */
             --secondary-light: #FDF2F8;
             --tertiary: #06B6D4; /* Bright Cyan */
+            --error: #EF4444; /* Red */
             
             --text-dark: #0F172A;
             --text-muted: #64748B;
@@ -48,22 +49,22 @@
             position: relative;
             overflow: hidden; /* Mengunci halaman di awal agar tidak bisa di-scroll */
             
-            /* --- FITUR KEAMANAN SMARTPHONE & DESKTOP --- */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none; /* Blokir pop-up Long Press di iOS & Android */
-            -webkit-tap-highlight-color: transparent; /* Hilangkan highlight saat disentuh */
+            /* --- FITUR KEAMANAN SMARTPHONE & DESKTOP AGRESIF --- */
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important; /* Blokir pop-up Long Press di iOS & Android */
+            -webkit-tap-highlight-color: transparent !important; /* Hilangkan highlight saat disentuh */
         }
         
         /* Pengecualian keamanan agar kolom pencarian tetap bisa diketik */
         input, textarea {
-            -webkit-user-select: auto;
-            -moz-user-select: auto;
-            -ms-user-select: auto;
-            user-select: auto;
-            -webkit-touch-callout: default;
+            -webkit-user-select: auto !important;
+            -moz-user-select: auto !important;
+            -ms-user-select: auto !important;
+            user-select: auto !important;
+            -webkit-touch-callout: default !important;
         }
 
         /* ── AESTHETIC AMBIENT BACKGROUND ── */
@@ -112,6 +113,112 @@
             100% { transform: translate(-2vw, 2vh) scale(0.9); }
         }
 
+        /* ── EFEK SCANLINE (ANTI FOTO KAMERA HP LAIN - EFEK MOIRÉ) ── */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.04) 50%, rgba(0,0,0,0.04));
+            background-size: 100% 4px;
+            z-index: 9996;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        body.unlocked-mode .scanlines {
+            opacity: 1;
+        }
+
+        /* ── MOVING WATERMARK RAPAT (ANTI FOTO & SCREENSHOT) ── */
+        .watermark-layer {
+            position: fixed;
+            top: -100%; left: -100%; width: 300%; height: 300%;
+            pointer-events: none;
+            z-index: 9997; 
+            /* Menggunakan pola teks berulang yang lebih rapat */
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='200'><text x='50%' y='50%' transform='rotate(-35 125 100)' fill='rgba(0,0,0,0.05)' font-size='18' font-family='sans-serif' font-weight='bold' text-anchor='middle'>DOKUMEN RAHASIA</text><text x='50%' y='70%' transform='rotate(-35 125 100)' fill='rgba(0,0,0,0.03)' font-size='14' font-family='sans-serif' font-weight='600' text-anchor='middle'>drg. Fakhrurrazi</text></svg>");
+            animation: watermarkMove 30s linear infinite;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        body.unlocked-mode .watermark-layer {
+            opacity: 1;
+        }
+
+        @keyframes watermarkMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(250px, 200px); }
+        }
+
+        /* ── SECURITY TIMER (10 MENIT) ── */
+        .security-timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(239, 68, 68, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            font-weight: 800;
+            font-size: 16px;
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+            letter-spacing: 2px;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .timer-icon {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ── EXPIRED SCREEN (SCAN ULANG) ── */
+        .expired-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            z-index: 10001;
+            display: none; /* Flex when active */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px;
+            color: white;
+        }
+
+        .expired-icon {
+            color: var(--error);
+            width: 80px;
+            height: 80px;
+            margin-bottom: 24px;
+        }
+
+        .expired-screen h2 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .expired-screen p {
+            font-size: 16px;
+            color: var(--text-light);
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
         /* ── TOP APP BAR (GLASSMORPHISM) ── */
         .app-bar {
             position: fixed;
@@ -149,7 +256,7 @@
             height: 100dvh;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Memastikan konten utama di tengah */
+            justify-content: center;
             align-items: center;
             padding: 40px 24px;
             text-align: center;
@@ -160,7 +267,6 @@
         .hero-text-wrapper {
             max-width: 900px;
             margin: 0 auto;
-            /* Pindahkan sedikit ke atas agar lebih simetris dengan slider di bawah */
             transform: translateY(-5vh); 
             animation: slideUpFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -196,10 +302,10 @@
             margin: 0 auto;
         }
 
-        /* ── SWIPE TO UNLOCK / GESER UNTUK BUKA (AESTHETIC & PRESISI) ── */
+        /* ── SWIPE TO UNLOCK ── */
         .swipe-container {
             position: absolute;
-            bottom: 8vh; /* Jarak tetap dari bawah agar presisi */
+            bottom: 8vh;
             width: 90%;
             max-width: 340px;
             height: 68px;
@@ -247,14 +353,8 @@
             z-index: 2;
         }
 
-        .swipe-thumb:active {
-            cursor: grabbing;
-        }
-
-        .swipe-thumb.dragging {
-            transition: none;
-        }
-        
+        .swipe-thumb:active { cursor: grabbing; }
+        .swipe-thumb.dragging { transition: none; }
         .swipe-thumb.unlocked {
             background: linear-gradient(135deg, #10B981, #059669);
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
@@ -266,10 +366,7 @@
             transition: opacity 0.6s ease;
         }
 
-        @keyframes shine {
-            to { background-position: 200% center; }
-        }
-
+        @keyframes shine { to { background-position: 200% center; } }
         @keyframes slideUpFade {
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
@@ -277,7 +374,7 @@
 
         /* ── MAIN CONTENT (CATALOG) ── */
         #main-content {
-            padding-top: 100px; /* Ruang untuk app-bar */
+            padding-top: 100px;
             padding-bottom: 80px;
             position: relative;
             z-index: 20;
@@ -500,61 +597,41 @@
             background: #FFFFFF;
         }
 
-        .search-input::placeholder {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
+        .search-input::placeholder { color: var(--text-muted); font-weight: 500; }
         .search-icon {
-            position: absolute;
-            left: 22px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--primary);
-            width: 20px;
-            height: 20px;
-            pointer-events: none;
+            position: absolute; left: 22px; top: 50%; transform: translateY(-50%);
+            color: var(--primary); width: 20px; height: 20px; pointer-events: none;
         }
-
-        .no-results {
-            text-align: center;
-            padding: 40px 20px;
-            display: none;
-            color: var(--text-muted);
-        }
-
-        /* Utility classes for filtering */
+        .no-results { text-align: center; padding: 40px 20px; display: none; color: var(--text-muted); }
         .hidden-item { display: none !important; }
         .hidden-section { display: none !important; }
 
         /* ── PRIVACY BLUR MODE (EFEK BLUR OTOMATIS) ── */
         #main-content, .app-bar {
-            transition: filter 0.5s ease, opacity 0.5s ease, transform 0.3s ease;
+            transition: filter 0.2s ease, opacity 0.2s ease, transform 0.3s ease;
         }
 
         body.privacy-mode #main-content,
         body.privacy-mode .app-bar {
-            filter: blur(12px) grayscale(40%);
-            opacity: 0.3;
+            filter: blur(20px) grayscale(50%);
+            opacity: 0; /* Menghilangkan total saat layar diblur/ditinggalkan */
             pointer-events: none;
         }
 
         .privacy-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 9998; /* Di bawah watermark tapi di atas konten */
+            z-index: 9998; 
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.2s ease;
         }
 
-        body.privacy-mode .privacy-overlay {
-            opacity: 1;
-        }
+        body.privacy-mode .privacy-overlay { opacity: 1; pointer-events: all; }
 
         .privacy-message {
             background: rgba(255, 255, 255, 0.95);
@@ -587,12 +664,33 @@
             .app-bar-title { font-size: 14px; }
             .swipe-container { bottom: 6vh; height: 62px; }
             .swipe-thumb { width: 52px; height: 52px; }
+            .security-timer { font-size: 14px; padding: 6px 12px; top: 16px; right: 16px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Privacy Overlay (Muncul saat tidak ada interaksi) -->
+    <!-- LAYER ANTI-FOTO KAMERA LAIN (MOIRE SCANLINES) -->
+    <div class="scanlines"></div>
+
+    <!-- LAYER WATERMARK RAPAT -->
+    <div class="watermark-layer"></div>
+
+    <!-- SECURITY TIMER -->
+    <div class="security-timer" id="securityTimer">
+        <svg class="timer-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span id="timerText">10:00</span>
+    </div>
+
+    <!-- EXPIRED SCREEN (WAJIB SCAN ULANG) -->
+    <div class="expired-screen" id="expiredScreen">
+        <svg class="expired-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        <h2>Sesi Keamanan Berakhir</h2>
+        <p>Batas waktu akses maksimal (10 Menit) untuk melihat dokumen rahasia ini telah habis.</p>
+        <p style="margin-top: 16px; font-weight: bold; color: white;">Silakan tutup halaman ini dan lakukan Scan QR Code kembali di meja resepsionis untuk mengakses ulang.</p>
+    </div>
+
+    <!-- Privacy Overlay (Layar Blur) -->
     <div class="privacy-overlay">
         <div class="privacy-message">
             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -620,7 +718,6 @@
             <p class="hero-subtitle">Buku Panduan Layanan & Estimasi Biaya Perawatan Klinis Tahun 2026</p>
         </div>
         
-        <!-- Interactive Swipe to Unlock -->
         <div class="swipe-container" id="swipeContainer">
             <div class="swipe-text" id="swipeText">Geser Untuk Melihat Harga</div>
             <div class="swipe-thumb" id="swipeThumb">
@@ -656,10 +753,8 @@
                     <div class="section-header">
                         <div class="icon-box">
                             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                                <!-- Bentuk Gigi Utama -->
                                 <path d="M10 21.5V14a2 2 0 0 1 4 0v7.5"></path>
                                 <path d="M14 21.5c4-2 6-5 6-10 0-4.5-2.5-8.5-8-8.5s-8 4-8 8.5c0 5 2 8 6 10"></path>
-                                <!-- Garis Detak Jantung / Diagnostik -->
                                 <polyline points="8 9 10 9 11 6 13 12 14 9 16 9"></polyline>
                             </svg>
                         </div>
@@ -702,10 +797,8 @@
                     <div class="section-header">
                         <div class="icon-box">
                             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                                <!-- Bentuk Gigi Utama -->
                                 <path d="M10 21.5V14a2 2 0 0 1 4 0v7.5"></path>
                                 <path d="M14 21.5c4-2 6-5 6-10 0-4.5-2.5-8.5-8-8.5s-8 4-8 8.5c0 5 2 8 6 10"></path>
-                                <!-- Kilau Bintang (Sparkles) -->
                                 <path d="M19 3l.5 1.5L21 5l-1.5.5L19 7l-.5-1.5L17 5l1.5-.5z"></path>
                                 <path d="M5 6l.5 1.5L7 8l-1.5.5L5 10l-.5-1.5L3 8l1.5-.5z"></path>
                             </svg>
@@ -715,10 +808,7 @@
                     <div class="list-container">
                         <div class="list-item">
                             <div class="item-text">
-                                <div class="item-title">
-                                    Bersihin Karang (Ringan)
-                                    <span class="badge badge-hot">Rekomendasi</span>
-                                </div>
+                                <div class="item-title">Bersihin Karang (Ringan) <span class="badge badge-hot">Rekomendasi</span></div>
                                 <div class="item-desc">Pembersihan karang gigi rutin 6 bulanan secara profesional.</div>
                             </div>
                             <div class="item-price">Rp 250.000 – 350.000</div>
@@ -739,10 +829,7 @@
                         </div>
                         <div class="list-item">
                             <div class="item-text">
-                                <div class="item-title">
-                                    Aplikasi Vitamin Gigi
-                                    <span class="badge badge-soon">Segera</span>
-                                </div>
+                                <div class="item-title">Aplikasi Vitamin Gigi <span class="badge badge-soon">Segera</span></div>
                                 <div class="item-desc">Perlindungan lapisan fluoride untuk mencegah gigi berlubang.</div>
                             </div>
                             <div class="item-price">Rp 150.000 – 300.000</div>
@@ -755,10 +842,8 @@
                     <div class="section-header">
                         <div class="icon-box">
                             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                                <!-- Bentuk Gigi Utama -->
                                 <path d="M10 21.5V14a2 2 0 0 1 4 0v7.5"></path>
                                 <path d="M14 21.5c4-2 6-5 6-10 0-4.5-2.5-8.5-8-8.5s-8 4-8 8.5c0 5 2 8 6 10"></path>
-                                <!-- Perisai / Perlindungan (Shield) -->
                                 <path d="M12 5.5l3 1.5v3c0 2.5-1.5 4.5-3 5.5-1.5-1-3-3-3-5.5v-3l3-1.5z"></path>
                             </svg>
                         </div>
@@ -795,10 +880,7 @@
                         </div>
                         <div class="list-item">
                             <div class="item-text">
-                                <div class="item-title">
-                                    Perawatan Saraf Gigi
-                                    <span class="badge badge-soon">Segera</span>
-                                </div>
+                                <div class="item-title">Perawatan Saraf Gigi <span class="badge badge-soon">Segera</span></div>
                                 <div class="item-desc">Terapi endodontik untuk gigi mati (Biaya per kunjungan).</div>
                             </div>
                             <div class="item-price">Rp 150.000 – 300.000</div>
@@ -811,10 +893,8 @@
                     <div class="section-header">
                         <div class="icon-box">
                             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                                <!-- Bentuk Gigi Utama -->
                                 <path d="M10 21.5V14a2 2 0 0 1 4 0v7.5"></path>
                                 <path d="M14 21.5c4-2 6-5 6-10 0-4.5-2.5-8.5-8-8.5s-8 4-8 8.5c0 5 2 8 6 10"></path>
-                                <!-- Panah Ekstraksi ke Atas -->
                                 <path d="M12 11V2"></path>
                                 <polyline points="9 5 12 2 15 5"></polyline>
                             </svg>
@@ -858,10 +938,8 @@
                     <div class="section-header">
                         <div class="icon-box">
                             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                                <!-- Bentuk Gigi Utama -->
                                 <path d="M10 21.5V14a2 2 0 0 1 4 0v7.5"></path>
                                 <path d="M14 21.5c4-2 6-5 6-10 0-4.5-2.5-8.5-8-8.5s-8 4-8 8.5c0 5 2 8 6 10"></path>
-                                <!-- Berlian / Estetika Premium -->
                                 <polygon points="12 5 15 8 12 12 9 8"></polygon>
                             </svg>
                         </div>
@@ -904,10 +982,8 @@
                     <div class="section-header">
                         <div class="icon-box">
                             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                                <!-- Bentuk Gigi Utama -->
                                 <path d="M10 21.5V14a2 2 0 0 1 4 0v7.5"></path>
                                 <path d="M14 21.5c4-2 6-5 6-10 0-4.5-2.5-8.5-8-8.5s-8 4-8 8.5c0 5 2 8 6 10"></path>
-                                <!-- Kawat Gigi (Braces/Wire) -->
                                 <path d="M4 10h16"></path>
                                 <rect x="7" y="8.5" width="2" height="3" rx="0.5"></rect>
                                 <rect x="11" y="8.5" width="2" height="3" rx="0.5"></rect>
@@ -919,10 +995,7 @@
                     <div class="list-container">
                         <div class="list-item">
                             <div class="item-text">
-                                <div class="item-title">
-                                    Pemasangan Behel
-                                    <span class="badge badge-soon">Tahap Persiapan</span>
-                                </div>
+                                <div class="item-title">Pemasangan Behel <span class="badge badge-soon">Tahap Persiapan</span></div>
                                 <div class="item-desc">Perawatan perbaikan susunan gigi. Layanan segera hadir.</div>
                             </div>
                             <div class="item-price" style="background: transparent; border: none; box-shadow: none; padding: 0;">—</div>
@@ -932,7 +1005,6 @@
 
             </div> <!-- End of Grid -->
 
-            <!-- PESAN JIKA TIDAK DITEMUKAN -->
             <div id="noResults" class="no-results">
                 <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" style="color: var(--text-light); margin: 0 auto 16px;">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -951,7 +1023,7 @@
         </footer>
     </div>
 
-    <!-- SCRIPT LOGIKA INTERAKSI GESER / SWIPE -->
+    <!-- SCRIPT LOGIKA -->
     <script>
         const swipeContainer = document.getElementById('swipeContainer');
         const swipeThumb = document.getElementById('swipeThumb');
@@ -960,20 +1032,28 @@
         const mainContent = document.getElementById('main-content');
         const mainNav = document.getElementById('main-nav');
         
+        // Timer Variables
+        const timerElement = document.getElementById('securityTimer');
+        const timerText = document.getElementById('timerText');
+        const expiredScreen = document.getElementById('expiredScreen');
+        let viewTimeLeft = 600; // 10 Menit dalam detik
+        let expireInterval;
+        
         let isDragging = false;
         let startX = 0;
         let currentX = 0;
         let maxSlide = 0;
         let unlocked = false;
+        let sessionExpired = false;
 
         function initSlider() {
-            if(!swipeContainer || !swipeThumb) return;
+            if(!swipeContainer || !swipeThumb || sessionExpired) return;
             maxSlide = swipeContainer.clientWidth - swipeThumb.clientWidth - 10;
             if(unlocked) swipeThumb.style.transform = `translateX(${maxSlide}px)`;
         }
 
         function handleStart(x) {
-            if (unlocked) return;
+            if (unlocked || sessionExpired) return;
             isDragging = true;
             startX = x;
             swipeThumb.classList.add('dragging');
@@ -981,7 +1061,7 @@
         }
 
         function handleMove(x) {
-            if (!isDragging || unlocked) return;
+            if (!isDragging || unlocked || sessionExpired) return;
             currentX = x - startX;
             if (currentX < 0) currentX = 0;
             if (currentX > maxSlide) currentX = maxSlide;
@@ -990,7 +1070,7 @@
         }
 
         function handleEnd() {
-            if (!isDragging || unlocked) return;
+            if (!isDragging || unlocked || sessionExpired) return;
             isDragging = false;
             swipeThumb.classList.remove('dragging');
             if (currentX >= maxSlide * 0.85) { 
@@ -1010,9 +1090,59 @@
         window.addEventListener('touchmove', (e) => handleMove(e.touches[0].clientX), {passive: true});
         window.addEventListener('touchend', handleEnd);
 
+        // --- SISTEM SELF-DESTRUCT (10 MENIT = 600 DETIK) ---
+        function startSecurityTimer() {
+            timerElement.style.display = 'flex';
+            document.body.classList.add('unlocked-mode'); // Munculkan Watermark & Scanline
+            
+            expireInterval = setInterval(() => {
+                viewTimeLeft--;
+                
+                // Kalkulasi menit & detik untuk format MM:SS
+                const minutes = Math.floor(viewTimeLeft / 60);
+                const seconds = viewTimeLeft % 60;
+                
+                // Format angka agar selalu 2 digit (mis: 09:05)
+                const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+                const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+                
+                timerText.textContent = `${formattedMinutes}:${formattedSeconds}`;
+                
+                if (viewTimeLeft <= 0) {
+                    clearInterval(expireInterval);
+                    forceLockScreen();
+                }
+            }, 1000);
+        }
+
+        // --- KUNCI TOTAL SETELAH 10 MENIT ---
+        function forceLockScreen() {
+            sessionExpired = true;
+            unlocked = false;
+            document.body.classList.remove('unlocked-mode');
+            
+            // Sembunyikan Semua UI
+            mainContent.style.display = 'none';
+            heroSection.style.display = 'none';
+            mainNav.style.display = 'none';
+            timerElement.style.display = 'none';
+            
+            // Tampilkan Layar Wajib Scan Ulang
+            expiredScreen.style.display = 'flex';
+            
+            // Matikan fungsi Scroll total
+            document.body.style.overflow = 'hidden';
+            
+            // Keluarkan dari full screen (jika sedang full screen)
+            if (document.exitFullscreen) { document.exitFullscreen().catch(()=>{}); }
+            else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+        }
+
         function unlockAction() {
             unlocked = true;
-            resetPrivacyTimer(); // Memulai deteksi mode privasi otomatis setelah berhasil masuk
+            
+            // Aktifkan Timer Penghancur
+            startSecurityTimer();
             
             // --- FITUR FULL SCREEN OTOMATIS ---
             let elem = document.documentElement;
@@ -1023,7 +1153,6 @@
             } else if (elem.msRequestFullscreen) { /* IE11 */
                 elem.msRequestFullscreen();
             }
-            // ----------------------------------
             
             swipeThumb.style.transform = `translateX(${maxSlide}px)`;
             swipeThumb.classList.add('unlocked');
@@ -1032,6 +1161,7 @@
             setTimeout(() => {
                 heroSection.classList.add('hidden');
                 setTimeout(() => {
+                    if(sessionExpired) return; // Batal tampilkan jika keburu mati
                     heroSection.style.display = 'none';
                     mainContent.style.display = 'block';
                     mainNav.style.transform = 'translateY(0)';
@@ -1062,7 +1192,6 @@
                     const title = item.querySelector('.item-title').textContent.toLowerCase();
                     const desc = item.querySelector('.item-desc').textContent.toLowerCase();
 
-                    // Cek apakah judul atau deskripsi mengandung kata kunci pencarian
                     if (title.includes(query) || desc.includes(query)) {
                         item.classList.remove('hidden-item');
                         hasVisibleItem = true;
@@ -1071,7 +1200,6 @@
                     }
                 });
 
-                // Sembunyikan bagian (kategori) jika tidak ada layanan yang cocok di dalamnya
                 if (hasVisibleItem) {
                     section.classList.remove('hidden-section');
                     totalVisibleSections++;
@@ -1080,7 +1208,6 @@
                 }
             });
 
-            // Tampilkan pesan "Tidak ditemukan" jika semua section tersembunyi
             if (totalVisibleSections === 0) {
                 noResultsMsg.style.display = 'block';
             } else {
@@ -1092,56 +1219,68 @@
         // --- SISTEM KEAMANAN PRIVASI & COPYRIGHT TINGKAT LANJUT ---
         // =========================================================
 
-        // 1. Mencegah Klik Kanan (Context Menu) di semua perangkat
+        // Fungsi Pembersih Clipboard
+        const clearClipboard = () => {
+            try { navigator.clipboard.writeText(''); } catch(err) {}
+        };
+
+        // 1. Mencegah Klik Kanan (Context Menu)
         document.addEventListener('contextmenu', event => {
-            // Kecuali jika sedang mengisi input pencarian
             if(event.target.tagName !== 'INPUT') {
                 event.preventDefault();
             }
         });
 
-        // 2. Mencegah fungsi Copy, Cut, dan Paste secara paksa
-        document.addEventListener('copy', event => event.preventDefault());
-        document.addEventListener('cut', event => event.preventDefault());
+        // 2. Mencegah fungsi Copy, Cut secara paksa dan bersihkan clipboard
+        document.addEventListener('copy', event => {
+            event.preventDefault();
+            clearClipboard();
+        });
+        document.addEventListener('cut', event => {
+            event.preventDefault();
+            clearClipboard();
+        });
         
-        // 3. Mencegah Drag & Drop elemen (terutama teks/ikon)
+        // 3. Mencegah Drag & Drop elemen
         document.addEventListener('dragstart', event => event.preventDefault());
 
-        // 4. Mencegah Shortcut Keyboard pencurian data
+        // 4. Mencegah Shortcut Keyboard pencurian data & Screenshot
         document.addEventListener('keydown', function(event) {
-            // Blokir tombol F12 (Developer Tools)
+            // Coba jegal PrintScreen/Screenshot Desktop
+            if (event.key === 'PrintScreen' || event.code === 'PrintScreen') {
+                clearClipboard();
+                enablePrivacyMode();
+            }
+
+            // Blokir tombol F12
             if (event.key === 'F12') {
                 event.preventDefault();
                 return false;
             }
             
-            // Blokir kombinasi tombol Ctrl atau Command (Mac)
+            // Blokir kombinasi tombol Ctrl / Cmd (Mac)
             if (event.ctrlKey || event.metaKey) {
-                // c=Copy, x=Cut, p=Print, s=Save, u=View Source, a=Select All
                 const forbiddenKeys = ['c', 'x', 'p', 's', 'u', 'a']; 
                 if (forbiddenKeys.includes(event.key.toLowerCase())) {
                     event.preventDefault();
+                    clearClipboard();
                     return false;
                 }
                 
-                // Blokir Ctrl+Shift+I / J / C (Akses Developer Tools Web)
-                if (event.shiftKey && ['i', 'j', 'c'].includes(event.key.toLowerCase())) {
+                if (event.shiftKey && ['i', 'j', 'c', 's'].includes(event.key.toLowerCase())) {
                     event.preventDefault();
+                    clearClipboard();
                     return false;
                 }
             }
         });
 
         // =========================================================
-        // --- FITUR PRIVACY BLUR (SENSOR OTOMATIS SMARTPHONE) ---
+        // --- FITUR PRIVACY BLUR (SENSOR OTOMATIS) ---
         // =========================================================
-        let privacyTimer;
-
         function enablePrivacyMode() {
-            if (unlocked) {
+            if (unlocked && !sessionExpired) {
                 document.body.classList.add('privacy-mode');
-                
-                // Menutup otomatis keyboard di HP jika pengguna sedang berada di kolom pencarian
                 if (document.activeElement && document.activeElement.tagName === 'INPUT') {
                     document.activeElement.blur();
                 }
@@ -1149,42 +1288,31 @@
         }
 
         function disablePrivacyMode() {
-            if (unlocked) {
+            if (unlocked && !sessionExpired) {
                 document.body.classList.remove('privacy-mode');
-                resetPrivacyTimer();
             }
         }
 
-        function resetPrivacyTimer() {
-            clearTimeout(privacyTimer);
-            if (unlocked) {
-                // Layar akan buram otomatis setelah 15 detik jika tidak ada sentuhan di HP
-                privacyTimer = setTimeout(enablePrivacyMode, 15000); 
-            }
-        }
-
-        // Deteksi aktivitas sentuhan / gerakan kursor untuk membatalkan blur dan mereset timer
         window.addEventListener('mousemove', disablePrivacyMode);
         window.addEventListener('touchstart', disablePrivacyMode, {passive: true});
         window.addEventListener('touchmove', disablePrivacyMode, {passive: true});
-        window.addEventListener('touchend', disablePrivacyMode, {passive: true}); // Sensor sentuhan layar di HP
+        window.addEventListener('touchend', disablePrivacyMode, {passive: true}); 
         window.addEventListener('scroll', disablePrivacyMode, {passive: true});
         window.addEventListener('keydown', disablePrivacyMode);
 
-        // Desktop: Langsung blur seketika saat kursor keluar dari jendela browser
+        // Agresif: Sensor langsung buram jika layar ditinggalkan (Sangat penting mencegah Screenshot HP)
         document.addEventListener('mouseleave', enablePrivacyMode);
-
-        // Mobile & Desktop: Deteksi akurat saat pindah aplikasi (Recent Apps) atau mematikan layar
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden' || document.hidden) {
+                // Di HP, saat buka menu screenshot layar akan jadi hidden sementara
                 enablePrivacyMode();
-            } else {
-                disablePrivacyMode();
+                clearClipboard();
             }
         });
-
-        // Mobile: Proteksi saat pengguna berpindah tab (Safari / Chrome)
-        window.addEventListener('pagehide', enablePrivacyMode);
+        window.addEventListener('pagehide', () => {
+            enablePrivacyMode();
+            clearClipboard();
+        });
 
     </script>
 
